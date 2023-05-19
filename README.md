@@ -1,28 +1,5 @@
 # Type Driven Development with Idris2
 
-## Cheatsheet
-
-### REPL
-
-    rlwrap idris2
-
-    :l "file.idr"   -- :load
-    :r              -- :reload
-
-    :ac <line> <func>           -- :addclause
-    :cs <line> <col> <term>     -- :casesplit
-    :ps <line> <hole>           -- :proofsearch
-    :psnext
-    :ml <line> <hole>           -- :makelemma
-
-
-### VIM
-
-    \a  " :addclause
-    \c  " :casesplit
-    \s  " :proofsearch
-    \l  " :makelemma
-
 ## Sandbox
 
 file
@@ -30,7 +7,6 @@ file
     1 module Main
     3 import Data.List
     5 addVector : (Num a) => List a -> List a -> List a
-
 
 REPL
 
@@ -65,4 +41,12 @@ REPL
     addVector_rhs_3 : Num a -> a -> List a -> List a
     addVector_rhs_3 conArg x xs
 
+file
 
+    3 append : List a -> List a -> List a
+
+    > :gd 3 append
+    append [] ys = ys
+    append (x :: xs) ys = x :: append xs ys
+
+    > :gdnext
