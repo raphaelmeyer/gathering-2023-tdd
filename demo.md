@@ -30,6 +30,7 @@ Open terminal
 
     > :l "intro.idr"
 
+
     accumulate : (Num a) => List a -> a
 
     accumulate : (Num a) => List a -> a
@@ -42,6 +43,7 @@ Open terminal
 ## Proof search
 
     > :l "append.idr"
+
 
     append : List a -> List a -> List a
 
@@ -82,15 +84,19 @@ _Expression search ... x :: append xs ys_ (`?append_rhs_1`)
     append [] ys = ys
     append (x :: xs) ys = x :: append xs ys
 
+
     > append [1,2] [3]
     > append [1,2] []
     > append [] [3]
 
 ### Try to generate a definition using proof-search
 
+Delete implementation of `append`
+
     append : List a -> List a -> List a
 
-    > :gd 3
+
+    > :gd 3 append
 
 ## Dependent types
 
@@ -98,7 +104,8 @@ Add two (mathematical) vectors `add [1,2,3] [4,5,6] = [5,7,9]`.
 
 ### Using List
 
-    :l "add.idr"
+    > :l "add.idr"
+
 
     add : (Num a) => List a -> List a -> List a
 
@@ -128,6 +135,7 @@ Implement `add_rhs_5`
     add [] (x :: xs) = ?add_rhs_3
     add (x :: xs) [] = ?add_rhs_4
     add (x :: xs) (y :: ys) = x + y :: add xs ys
+
 
     > add [] []
     > add [1] [2]
@@ -159,11 +167,14 @@ Implement `add_rhs_2`
     add [] [] = []
     add (x :: xs) (y :: ys) = x + y :: add xs ys
 
+
     > add [] []
     > add [1,2] [3,4]
     > add [1,2] [3,4,5]
 
 ### zip
+
+    > :l "zip.idr"
 
     > :import Data.Vect
     > :let a : Vect 2 Integer
@@ -196,10 +207,111 @@ _Generate definition ..._
     zip f [] [] = []
     zip f (x :: xs) (y :: ys) = f x y :: zip f xs ys
 
+
     > Main.zip (+) [1,2] [3,4]
 
-## Protocol example ?
+## Insertion sort
 
-send x receive type a
-send y receive type b
-else compile error
+    > :l "sort.idr"
+
+
+    insertionSort : (Ord a) => Vect n a -> Vect n a
+
+_Add clause_
+_Case split xs_
+
+    insertionSort : (Ord a) => Vect n a -> Vect n a
+    insertionSort [] = ?insertionSort_rhs_0
+    insertionSort (x :: xs) = ?insertionSort_rhs_1
+
+_Expr search ... []_ (`insertionSort_rhs_0`)
+
+    insertionSort : (Ord a) => Vect n a -> Vect n a
+    insertionSort [] = []
+    insertionSort (x :: xs) = ?insertionSort_rhs_1
+
+Rename hole `insertionSort_rhs_1` to `insert`
+
+    insertionSort : (Ord a) => Vect n a -> Vect n a
+    insertionSort [] = []
+    insertionSort (x :: xs) = ?insert
+
+_Make lemma ?insert_
+
+    insert : Ord a -> a -> Vect len a -> Vect (S len) a
+
+Remove `conArg` and adapt signature
+
+    insert : (Ord a) => a -> Vect len a -> Vect (S len) a
+
+_Peano arithmetic_
+
+    > :doc Nat
+    > Z
+    > :t Z
+    > S Z
+    > S (S Z)
+    > S (S (S Z))
+    > S 41
+
+Explain `Vect (S len) a`
+
+Implement sort
+
+    insertionSort : (Ord a) => Vect n a -> Vect n a
+    insertionSort [] = []
+    insertionSort (x :: xs) = insert x (insertionSort xs)
+
+_Add clause_
+_Case split xs_
+
+    insert : (Ord a) => a -> Vect len a -> Vect (S len) a
+    insert x [] = ?insert_rhs_0
+    insert x (y :: xs) = ?insert_rhs_1
+
+_Expr search ... []_ (`insert_rhs_0`)
+
+    insert : (Ord a) => a -> Vect len a -> Vect (S len) a
+    insert x [] = [x]
+    insert x (y :: xs) = ?insert_rhs_1
+
+_Make case ... ?insert_rhs_1_
+
+    insert : (Ord a) => a -> Vect len a -> Vect (S len) a
+    insert x [] = [x]
+    insert x (y :: xs) = case _ of
+                            case_val => ?insert_rhs_1
+
+Implement `_` in case of
+
+    insert : (Ord a) => a -> Vect len a -> Vect (S len) a
+    insert x [] = [x]
+    insert x (y :: xs) = case x < y of
+                            case_val => ?insert_rhs_1
+
+_Case split case_val_
+
+    insert : (Ord a) => a -> Vect len a -> Vect (S len) a
+    insert x [] = [x]
+    insert x (y :: xs) = case x < y of
+                            False => ?insert_rhs_2
+                            True => ?insert_rhs_3
+
+_Expression search ... x :: (y :: xs)_
+
+    insert : (Ord a) => a -> Vect len a -> Vect (S len) a
+    insert x [] = [x]
+    insert x (y :: xs) = case x < y of
+                            False => ?insert_rhs_2
+                            True => x :: (y :: xs)
+
+Implement insertion
+
+    insert : (Ord a) => a -> Vect len a -> Vect (S len) a
+    insert x [] = [x]
+    insert x (y :: xs) = case x < y of
+                            False => y :: insert x xs
+                            True => x :: (y :: xs)
+
+
+    > insertionSort [3,6,2,4,1]
